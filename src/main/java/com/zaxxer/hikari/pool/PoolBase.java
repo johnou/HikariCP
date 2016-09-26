@@ -33,8 +33,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.StandardMBean;
 import javax.sql.DataSource;
 
+import com.zaxxer.hikari.HikariConfigMXBean;
+import com.zaxxer.hikari.HikariPoolMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -241,7 +244,7 @@ abstract class PoolBase
    /**
     * Register MBeans for HikariConfig and HikariPool.
     *
-    * @param pool a HikariPool instance
+    * @param hikariPool a HikariPool instance
     */
    void registerMBeans(final HikariPool hikariPool)
    {
@@ -255,8 +258,8 @@ abstract class PoolBase
          final ObjectName beanConfigName = new ObjectName("com.zaxxer.hikari:type=PoolConfig (" + poolName + ")");
          final ObjectName beanPoolName = new ObjectName("com.zaxxer.hikari:type=Pool (" + poolName + ")");
          if (!mBeanServer.isRegistered(beanConfigName)) {
-            mBeanServer.registerMBean(config, beanConfigName);
-            mBeanServer.registerMBean(hikariPool, beanPoolName);
+            mBeanServer.registerMBean(new StandardMBean(config, HikariConfigMXBean.class, true), beanConfigName);
+            mBeanServer.registerMBean(new StandardMBean(hikariPool, HikariPoolMXBean.class, true), beanPoolName);
          }
          else {
             LOGGER.error("{} - JMX name ({}) is already registered.", poolName, poolName);
